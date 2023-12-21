@@ -83,9 +83,8 @@ def get_external_ip():
 
 def get_uptime():
 	uptime = int(float(open('/proc/uptime').read().split()[0]))
-	week_days = strfdelta(uptime, '{W}w {D}d', 's')
-	time = strfdelta(uptime, '{D}d {H}:{M:02}:{S:02}', 's').split(' ')[1]
-	return week_days, time
+	split_time = strfdelta(uptime, '{W}w {D}d {H}:{M:02}:{S:02}', 's').split(' ')
+	return ' '.join(split_time[0:2]), split_time[2]
 
 def get_update_count():
 	upgrades = subprocess.run(['apt', 'list', '--upgradable'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
