@@ -7,6 +7,7 @@ import subprocess
 from PIL import Image, ImageFont
 _picdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'pic')
 
+from string import Formatter
 import datetime
 import socket
 import urllib.request
@@ -18,6 +19,7 @@ def init_fonts(police: str = 'Font.ttc'):
 	fontSet = {}
 	fontSet['9'] = ImageFont.truetype(os.path.join(_picdir, police), 9)
 	fontSet['11'] = ImageFont.truetype(os.path.join(_picdir, police), 11)
+	fontSet['12'] = ImageFont.truetype(os.path.join(_picdir, police), 12)
 	fontSet['14'] = ImageFont.truetype(os.path.join(_picdir, police), 14)
 	fontSet['16'] = ImageFont.truetype(os.path.join(_picdir, police), 16)
 	fontSet['18'] = ImageFont.truetype(os.path.join(_picdir, police), 18)
@@ -40,7 +42,7 @@ def init_icon_set():
 	iconSet['cpu'] = Image.open(os.path.join(_picdir, 'cpu.png'))
 	iconSet['memory'] = Image.open(os.path.join(_picdir, 'memory.png'))
 	iconSet['uptime'] = Image.open(os.path.join(_picdir, 'uptime.png'))
-	iconSet['security_updates'] = Image.open(os.path.join(_picdir, 'security-updates2.png'))
+	iconSet['security_updates'] = Image.open(os.path.join(_picdir, 'security-updates.png'))
 	iconSet['docker'] = Image.open(os.path.join(_picdir, 'docker.png'))
 	iconSet['battery_charging'] = Image.open(os.path.join(_picdir, 'battery-charging.png'))
 	iconSet['battery_charged'] = Image.open(os.path.join(_picdir, 'battery-charged.png'))
@@ -80,7 +82,10 @@ def get_external_ip():
 	return urllib.request.urlopen('https://ident.me').read().decode('utf8')
 
 def get_uptime():
-	return str(datetime.timedelta(seconds=int(float(open('/proc/uptime').read().split()[0]))))
+	uptime = int(float(open('/proc/uptime').read().split()[0]))
+	week_days = strfdelta(uptime, '{W}w {D}d', 's')
+	time = strfdelta(uptime, '{D}d {H}:{M:02}:{S:02}', 's').split(' ')[1]
+	return week_days, time
 
 def get_update_count():
 	upgrades = subprocess.run(['apt', 'list', '--upgradable'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE)
@@ -89,3 +94,50 @@ def get_update_count():
 def get_docker_containers_count():
 	docker_containers = docker.from_env().containers
 	return len(docker_containers.list(filters={'status':'running'}))
+
+def strfdelta(tdelta, fmt='{D:02}d {H:02}h {M:02}m {S:02}s', inputtype='timedelta'):
+    """Convert a datetime.timedelta object or a regular number to a custom-
+    formatted string, just like the stftime() method does for datetime.datetime
+    objects.
+
+    The fmt argument allows custom formatting to be specified.  Fields can 
+    include seconds, minutes, hours, days, and weeks.  Each field is optional.
+
+    Some examples:
+        '{D:02}d {H:02}h {M:02}m {S:02}s' --> '05d 08h 04m 02s' (default)
+        '{W}w {D}d {H}:{M:02}:{S:02}'     --> '4w 5d 8:04:02'
+        '{D:2}d {H:2}:{M:02}:{S:02}'      --> ' 5d  8:04:02'
+        '{H}h {S}s'                       --> '72h 800s'
+
+    The inputtype argument allows tdelta to be a regular number instead of the  
+    default, which is a datetime.timedelta object.  Valid inputtype strings: 
+        's', 'seconds', 
+        'm', 'minutes', 
+        'h', 'hours', 
+        'd', 'days', 
+        'w', 'weeks'
+    """
+
+    # Convert tdelta to integer seconds.
+    if inputtype == 'timedelta':
+        remainder = int(tdelta.total_seconds())
+    elif inputtype in ['s', 'seconds']:
+        remainder = int(tdelta)
+    elif inputtype in ['m', 'minutes']:
+        remainder = int(tdelta)*60
+    elif inputtype in ['h', 'hours']:
+        remainder = int(tdelta)*3600
+    elif inputtype in ['d', 'days']:
+        remainder = int(tdelta)*86400
+    elif inputtype in ['w', 'weeks']:
+        remainder = int(tdelta)*604800
+
+    f = Formatter()
+    desired_fields = [field_tuple[1] for field_tuple in f.parse(fmt)]
+    possible_fields = ('W', 'D', 'H', 'M', 'S')
+    constants = {'W': 604800, 'D': 86400, 'H': 3600, 'M': 60, 'S': 1}
+    values = {}
+    for field in possible_fields:
+        if field in desired_fields and field in constants:
+            values[field], remainder = divmod(remainder, constants[field])
+    return f.format(fmt, **values)

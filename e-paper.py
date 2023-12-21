@@ -36,11 +36,11 @@ def update_display(epd, image: Image, draw: ImageDraw, rr: RedReactor):
 	draw.line((240, 0, 240, 240), fill = 0)
 	draw.line((0, 90, 360, 90), fill = 0)
 	draw.line((120, 90, 120, 240), fill = 0)
-	image.paste(icons['home'], (10, 3))
-	draw.text((54, 12), get_interal_ip(), font = fonts['20'], fill = 0)
+	image.paste(icons['home'], (5, 3))
+	draw.text((50, 8), get_interal_ip(), font = fonts['26'], fill = 0)
 	
-	image.paste(icons['web'], (10, 48))
-	draw.text((54, 55), get_external_ip(), font = fonts['20'], fill = 0)
+	image.paste(icons['web'], (5, 45))
+	draw.text((50, 48), get_external_ip(), font = fonts['26'], fill = 0)
 
 	battery_icon = None
 	match rr.battery_status:
@@ -63,24 +63,26 @@ def update_display(epd, image: Image, draw: ImageDraw, rr: RedReactor):
 	charge = "{:4} %".format(rr.battery_charge)
 	draw.text((254, 50), charge, font = fonts['30'], fill = 0)
 
-	image.paste(icons['uptime'], (15, 95))
-	draw.text((50, 100), get_uptime(), font = fonts['18'], fill = 0)
+	image.paste(icons['uptime'], (5, 97))
+	wd, time = get_uptime()
+	draw.text((40, 93), wd, font = fonts['18'], fill = 0)
+	draw.text((40, 111), time, font = fonts['12'], fill = 0)
 	
-	image.paste(icons['memory'], (15, 134))
+	image.paste(icons['memory'], (5, 134))
 	total_ram, ram_used, percent_ram = get_ram_info()
-	draw.text((50, 132), "{:3} %".format(percent_ram), font = fonts['18'], fill = 0)
-	draw.text((50, 150), "({}B/{}B)".format(ram_used, total_ram), font = fonts['11'], fill = 0)
+	draw.text((40, 132), "{:3} %".format(percent_ram), font = fonts['18'], fill = 0)
+	draw.text((40, 150), "({}B/{}B)".format(ram_used, total_ram), font = fonts['11'], fill = 0)
 	
-	image.paste(icons['cpu'], (15, 172))
-	draw.text((50, 175), "{:3} %".format(get_cpu_usage()), font = fonts['18'], fill = 0)
+	image.paste(icons['cpu'], (5, 172))
+	draw.text((40, 175), "{:3} %".format(get_cpu_usage()), font = fonts['18'], fill = 0)
 	
-	image.paste(icons['disk'], (18, 209))
+	image.paste(icons['disk'], (8, 209))
 	disk_total, disk_used, disk_percent = get_disk_usage()
-	draw.text((50, 206), "{:3} %".format(disk_percent), font = fonts['18'], fill = 0)
-	draw.text((50, 224), "({}B/{}B)".format(disk_used, disk_total), font = fonts['11'], fill = 0)
+	draw.text((40, 206), "{:3} %".format(disk_percent), font = fonts['18'], fill = 0)
+	draw.text((40, 224), "({}B/{}B)".format(disk_used, disk_total), font = fonts['11'], fill = 0)
 	
-	image.paste(icons['security_updates'], (145, 105))
-	draw.text((158, 185), "{:3}".format(get_update_count()), font = fonts['30'], fill = 0)
+	image.paste(icons['security_updates'], (140, 105))
+	draw.text((155, 185), "{:3}".format(get_update_count()), font = fonts['30'], fill = 0)
 	draw.text((150, 215), "updates", font = fonts['18'], fill = 0)
 	
 	image.paste(icons['docker'], (260, 110))
@@ -114,8 +116,8 @@ if __name__ == '__main__':
 	epd = epd3in52.EPD()
 	epd.init()
 	epd.display_NUM(epd.WHITE)
-	# epd.lut_GC()
-	# epd.refresh()
+	epd.lut_GC()
+	epd.refresh()
 
 	epd.send_command(0x50)
 	epd.send_data(0x17)
@@ -126,7 +128,7 @@ if __name__ == '__main__':
 		update_display(epd, image, draw ,rr)
 		
 		epd.display(epd.getbuffer(image.transpose(Image.Transpose.ROTATE_180)))
-		epd.lut_GC()
+		epd.lut_DU()
 		epd.refresh()
 		
 		exit_event.wait(report_interval)
