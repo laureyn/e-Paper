@@ -18,4 +18,4 @@ RestartSec=5
 
 [Install]
 ; # Wait until network target, but app will retry on failure to connect
-WantedBy=multi-user.target
+WantedBy=default.target

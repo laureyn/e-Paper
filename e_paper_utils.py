@@ -71,15 +71,20 @@ def get_disk_usage():
 	return size(disk_usage.total), size(disk_usage.used), disk_usage.percent
 
 def get_interal_ip():
-	# Top-left corner info
-	s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-	s.connect(("8.8.8.8", 80))
-	internal_ip = s.getsockname()[0]
-	s.close()
-	return internal_ip
+	try:
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		s.connect(("8.8.8.8", 80))
+		internal_ip = s.getsockname()[0]
+		s.close()
+		return internal_ip
+	except:
+		return '-'
 
 def get_external_ip():
-	return urllib.request.urlopen('https://ident.me').read().decode('utf8')
+	try:
+		return urllib.request.urlopen('https://ident.me').read().decode('utf8')
+	except:
+		return '-'
 
 def get_uptime():
 	uptime = int(float(open('/proc/uptime').read().split()[0]))
