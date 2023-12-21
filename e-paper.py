@@ -129,7 +129,7 @@ if __name__ == '__main__':
 		epd.lut_GC()
 		epd.refresh()
 		
-		exit_event.wait(10)
+		exit_event.wait(report_interval)
 
 	logging.info("Shutting down...")
 

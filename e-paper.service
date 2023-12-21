@@ -9,9 +9,9 @@ StartLimitBurst=5
 # Edit path if necessary
 WorkingDirectory=/opt/e-Paper
 # Create logs in username or remove for root
-User=epaper
+#User=epaper
 # Edit path if necessary
-ExecStart=.venv/bin/python3 e-paper.py
+ExecStart=/opt/e-Paper/.venv/bin/python3 /opt/e-Paper/e-paper.py
 # Restart on failure after 5 seconds
 Restart=true
 RestartSec=5
