@@ -125,7 +125,7 @@ if __name__ == '__main__':
 		draw = ImageDraw.Draw(image)
 		update_display(epd, image, draw ,rr)
 		
-		epd.display(epd.getbuffer(image))
+		epd.display(epd.getbuffer(image.transpose(Image.Transpose.ROTATE_180)))
 		epd.lut_GC()
 		epd.refresh()
 		
@@ -136,7 +136,7 @@ if __name__ == '__main__':
 	image = Image.new('1', (epd.height, epd.width), 255)  # 255: clear the frame
 	draw = ImageDraw.Draw(image)
 	draw.text((20, 35), 'Good Bye', font = cursiveFonts['64'], fill = 0)
-	epd.display(epd.getbuffer(image))
+	epd.display(epd.getbuffer(image.transpose(Image.Transpose.ROTATE_180)))
 	epd.lut_GC()
 	epd.refresh()
 
