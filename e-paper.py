@@ -18,7 +18,7 @@ from e_paper_utils import *
 from red_reactor import verify_RedReactor_requirements, RedReactor
 
 logging.basicConfig(
-	filename="/opt/e-Paper/e-paper.log",
+	filename=os.path.join(os.path.dirname(os.path.realpath(__file__)),"e-paper.log"),
 	encoding="utf8",
 	format='[%(asctime)s][%(levelname)-7s] - %(message)s',
     level=logging.INFO,
